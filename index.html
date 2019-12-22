@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Devon Wieczorek - Advance Local</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+
+<body class="container-fluid bg-light">
+
+    <header class="my-3">
+        <center>
+            <h1>Strange Universe</h1>
+        </center>
+    </header>
+
+    <div class="pr-3 pl-3 mb-5">
+        <center>
+            <p class="lead">
+                It's a strange universe out there!<br />
+                Take a look at some of the MANY species that we've found so far!
+            </p>
+        </center>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-12 col-md-6 mt-2">
+                <h3>Star Wars</h3>
+                <div id="star-wars"><!-- Results go here --></div>
+            </div>
+            <div class="col-xs-12 col-md-6 mt-2">
+                <h3>Pokemon</h3>
+                <div id="pokemon"><!-- Results go here --></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="px-5 py-3 text-muted">
+        <center>
+            Devon Wieczorek &middot; <a class="text-muted" href="mailto:devon.wieczorek@icloud.com">Devon.Wieczorek@iCloud.com</a> &middot; <a class="text-muted" href="tel:2015277400">(201) 527-7400</a>
+        </center>
+    </footer>
+
+    <script type="text/javascript">
+        function makeID(name){
+            return name.toLowerCase().replace(' ', '') + parseInt(Math.random() * 1000);
+        }
+
+        function capitalize(string){
+          if (typeof string !== 'string') return '';
+          return string.split(' ').map(function(s){
+              return s.charAt(0).toUpperCase() + s.slice(1);
+          }).join(' ');
+        }
+
+        function makeScript(src) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = src;
+            document.head.appendChild(script);
+        }
+
+        // Polyfill fetch if needed
+        (function() {
+            if (!window.fetch) makeScript('https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.min.js');
+        })();
+    </script>
+
+    <!-- Star Wars Functions -->
+    <script type="text/javascript">
+        function getStarWarsCreatures(){
+            return new Promise(function(resolve, reject){
+                fetch('https://swapi.co/api/species/?limit=10')
+                    .then(res => res.json())
+                    .then(function(res){ resolve(res) })
+                    .catch(function(err){ reject(err) });
+            });
+        }
+
+        function starWarsCreature(id, name, classification, designation, height, lifespan, language){
+            return `
+                <div id="${id}" class="card col-xs-6 mb-2">
+                    <div class="card-header">${name}</div>
+                    <table class="card-table table">
+                        <tr>
+                            <td><strong>Classification: </strong></td>
+                            <td>${classification}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Designation: </strong></td>
+                            <td>${designation}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Average Height: </strong></td>
+                            <td>${height}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Average Lifespan: </strong></td>
+                            <td>${lifespan}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Language: </strong></td>
+                            <td>${language}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }
+
+        function populateStarWarsCreatures(creatures){
+            var parent = document.getElementById('star-wars');
+            for(var c in creatures){
+                var {name, classification, designation,average_height, average_lifespan, language} = creatures[c];
+                parent.innerHTML += starWarsCreature(makeID(name), name, classification, designation,average_height, average_lifespan, language);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function(){
+            getStarWarsCreatures()
+                .then(function(creatures){
+                    populateStarWarsCreatures(creatures.results)
+                })
+                .catch(function(err){ console.error(err) })
+        });
+    </script>
+
+    <!-- Pokemon Functions -->
+    <script type="text/javascript">
+        function getAllPokemonSpecies(){
+            return new Promise(function(resolve, reject){
+                fetch('https://pokeapi.co/api/v2/pokemon-species/?limit=10')
+                    .then(res => res.json())
+                    .then(function(res){ resolve(res) })
+                    .catch(function(err){ reject(err) });
+            })
+        }
+
+        function getSinglePokemon(url){
+            return new Promise(function(resolve, reject){
+                fetch(url)
+                    .then(res => res.json())
+                    .then(function(res){ resolve(res) })
+                    .catch(function(err){ reject(err) });
+            })
+        }
+
+        function getAllPokemonInfo(pokePromises){
+            return new Promise(function(resolve, reject){
+                Promise.all(pokePromises)
+                    .then(function(res){ resolve(res) })
+                    .catch(function(err){
+                        console.error(err);
+                        reject(err);
+                    });
+            })
+        }
+
+        function pokemon(id, name, shape, habitat, happiness, captureRate, generation){
+            return `
+                <div id="${id}" class="card col-xs-6 mb-2">
+                    <div class="card-header">${name}</div>
+                    <table class="card-table table">
+                        <tr>
+                            <td><strong>Shape: </strong></td>
+                            <td>${shape}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Habitat: </strong></td>
+                            <td>${habitat}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Base Happiness: </strong></td>
+                            <td>${happiness}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Capture Rate: </strong></td>
+                            <td>${captureRate}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Language: </strong></td>
+                            <td>${generation}</td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+        }
+
+        function populatePokemon(pokedex){
+            var parent = document.getElementById('pokemon');
+            for(var p in pokedex){
+                var {name, shape, habitat, base_happiness, capture_rate, generation} = pokedex[p];
+                parent.innerHTML += pokemon(makeID(name), capitalize(name), shape.name, habitat.name, base_happiness, capture_rate, generation.name);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function(){
+            getAllPokemonSpecies()
+                .then(async function(species){
+                    var pokePromises = [];
+                    for(var s in species.results){
+                        pokePromises.push(getSinglePokemon(species.results[s].url))
+                    }
+                    var pokedex = await getAllPokemonInfo(pokePromises);
+                    populatePokemon(pokedex);
+                })
+                .catch(function(err){ console.error(err) })
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+
+</html>
